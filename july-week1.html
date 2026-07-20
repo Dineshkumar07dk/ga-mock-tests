@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>July 2026 Current Affairs - 3D Analytics Dashboard</title>
+    <!-- Highcharts 3D Libraries for True 3D Pie Chart -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+            --correct-color: #10b981;
+            --wrong-color: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        .glass-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-header h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard {
+            display: none;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        #chart3DContainer {
+            width: 100%;
+            height: 280px;
+        }
+
+        .stats-box {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .stat-line {
+            font-size: 17px;
+            margin: 12px 0;
+            font-weight: 600;
+        }
+
+        .q-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 25px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .q-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .q-text {
+            font-size: 15.5px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .option input {
+            margin-right: 12px;
+            accent-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .exp-box {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            font-size: 13.5px;
+            color: #cbd5e1;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+        }
+
+        .btn-action {
+            width: 100%;
+            background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn-action:hover {
+            background: linear-gradient(90deg, #4f46e5 0%, #4338ca 100%);
+        }
+
+        .option.correct-choice { 
+            background: rgba(16, 185, 129, 0.18) !important; 
+            border-color: var(--correct-color) !important; 
+            color: #a7f3d0; 
+            font-weight: 600; 
+        }
+        
+        .option.wrong-choice { 
+            background: rgba(239, 68, 68, 0.18) !important; 
+            border-color: var(--wrong-color) !important; 
+            color: #fca5a5; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 650px) {
+            .analytics-grid { grid-template-columns: 1fr; text-align: center; }
+            .stats-box { padding-left: 0; margin-top: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="glass-header">
+        <h1>July 2026 Current Affairs Pro Engine</h1>
+        <p style="margin: 8px 0 0 0; font-size: 13.5px; color: var(--text-muted);">
+            Complete 95 Topics 3D Interactive Examination Portal
+        </p>
+    </div>
+
+    <!-- Analytics Dashboard with True 3D Chart -->
+    <div id="dashboard" class="dashboard">
+        <h2 style="margin: 0 0 10px 0; color: var(--accent); text-align: center; font-size: 20px;">Performance Analytics</h2>
+        <div class="analytics-grid">
+            <div id="chart3DContainer"></div>
+            <div class="stats-box">
+                <div class="stat-line" id="scoreText" style="color: #6366f1;"></div>
+                <div class="stat-line" id="percentileText" style="color: #a855f7;"></div>
+                <div class="stat-line" style="color: var(--correct-color);">Correct Answers: <span id="correctCount"></span></div>
+                <div class="stat-line" style="color: var(--wrong-color);">Wrong/Unattempted: <span id="wrongCount"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <div id="questions-pool"></div>
+        <button type="button" class="btn-action" onclick="evaluateMetrics()">Submit Test & Render 3D Chart</button>
+    </form>
+</div>
+
+<script>
+    // Complete database covering all 95 topics from the July 2026 PDF
+    const db = [
+        { q: "Adani Airport City Ltd (AACL) plans to invest over Rs 20,000 crore across 6 airports spanning how many acres in Phase 1?", a: ["A) 450 acres", "B) 520 acres", "C) 655 acres", "D) 800 acres"], c: "C", e: "Spans 655 acres across 6 airports with ~22 million sq. ft. developed area. Also launched 'Harit Amrit' organic fertilizer brand." },
+        { q: "Where was the concluding National Awareness Programme of 'Nasha Mukt Bharat Saptah' held?", a: ["A) AIIMS New Delhi", "B) Dev Sanskriti Vishwavidyalaya, Haridwar", "C) Panjab University, Chandigarh", "D) BHU Varanasi"], c: "B", e: "Led by Dr. Virendra Kumar under theme 'Nasha Mukt Bharat Abhiyaan - Viksit Bharat Ki Pehchaan'." },
+        { q: "Who was conferred the prestigious 'Sukhatme National Award in Statistics for 2026' during the 20th Statistics Day?", a: ["A) Prof. Arup Bose", "B) Dr. P.K. Mishra", "C) Prof. Rangan Banerjee", "D) Dr. Soumya Swaminathan"], c: "A", e: "Conferred on Arup Bose (Retd. Prof., ISI Kolkata). The theme was 'Unlocking the Potential of Administrative Data'." },
+        { q: "Under Delhi EV Policy 2026 (EV Policy 2.0), from which date will registration of new petrol/CNG two-wheelers be discontinued?", a: ["A) Jan 1, 2027", "B) April 1, 2028", "C) March 31, 2030", "D) Dec 31, 2026"], c: "B", e: "Discontinued from April 1, 2028. From Jan 1, 2027, only electric 3-wheelers and N1 goods carriers are allowed." },
+        { q: "Border Roads Organisation's 'Project BRAHMANK' celebrated its 16th Raising Day in which state?", a: ["A) Ladakh", "B) Sikkim", "C) Arunachal Pradesh", "D) Uttarakhand"], c: "C", e: "Celebrated at Ranaghat, East Siang district, Arunachal Pradesh. Maintains 811 km roads across 5 districts." },
+        { q: "Who chairs the High-Level Study Group constituted by MIB to make Indian cinema globally competitive?", a: ["A) Prasoon Joshi", "B) Karan Johar", "C) Shekhar Kapur", "D) Prasoon Pandey"], c: "A", e: "Chaired by Prasoon Joshi (Chairman, Prasar Bharati). A 2nd initiative circulated 'Model State Cinema Regulations'." },
+        { q: "Which cloud platform hosts the newly launched 'FCRA 2.0 Portal' launched by Union Home Minister Amit Shah?", a: ["A) MeghRaj", "B) AWS GovCloud", "C) NIC Cloud", "D) Bhashini AI"], c: "A", e: "Hosted on MeghRaj (National Government Cloud). Also launched e-OCI Card fully digitising OCI ecosystem." },
+        { q: "How many Tiger Reserves out of 58 in India were identified as requiring priority recovery interventions?", a: ["A) 12", "B) 18", "C) 25", "D) 32"], c: "C", e: "25 reserves have low or zero tiger populations due to low prey density, fragmented connectivity, or LWE." },
+        { q: "Dr. Jitendra Singh inaugurated the 3rd batch of leadership programme 'DAKSH'. What does 'DAKSH' stand for?", a: ["A) Development of Aspiration, Knowledge, Succession and Harmony", "B) Digital Advancement, Knowledge & Skill Hub", "C) Domain Authority for Knowledge Sharing", "D) Direct Action for Knowledge Systems"], c: "A", e: "Organised jointly by SCOPE and CBC for CPSE senior executives with ISB as knowledge partner." },
+        { q: "Where did UIDAI inaugurate Nagaland's first directly established and operated 'Aadhaar Seva Kendra (ASK)'?", a: ["A) Kohima", "B) Dimapur", "C) Mokokchung", "D) Tuensang"], c: "B", e: "Inaugurated in Dimapur (Category C center). Aadhaar coverage in Nagaland stands at ~67%." },
+        { q: "CCEA approved the 117.7 km Kanpur-Kabrai Greenfield Highway on NH-34 on which implementation mode?", a: ["A) EPC Mode", "B) BOT (Toll) Mode", "C) Hybrid Annuity Mode", "D) Item Rate Contract"], c: "B", e: "Kanpur-Kabrai on BOT (Toll) mode; Delhi 6-lane tunnel connecting Dwarka Expressway to Vasant Kunj is on HAM mode." },
+        { q: "Which CPSE under the Ministry of Steel was granted 'Miniratna Category-I' status in July 2026?", a: ["A) MECON Limited", "B) MOIL Limited", "C) KIOCL", "D) MSTC Limited"], c: "A", e: "Granted to MECON Ltd after posting continuous PBT growth (104.53 Cr in FY26 and net worth of 535.42 Cr)." },
+        { q: "Gujarat CM Bhupendra Patel launched 'Namo Swachhata Abhiyan' and 'Amritpan Abhiyan'. What is the primary focus of 'Amritpan Abhiyan'?", a: ["A) Water Conservation", "B) Maternal and Child Health", "C) Organic Farming", "D) Elderly Care"], c: "B", e: "'Amritpan Abhiyan' focuses on safeguarding maternal and child health through proper nutrition from birth." },
+        { q: "With the addition of 23 new traditional products in June 2026, what is West Bengal's total GI tag count?", a: ["A) 42", "B) 59", "C) 76", "D) 83"], c: "B", e: "West Bengal now ranks 3rd in India with 59 GI tags (UP leads at 83, TN at 76). West Bengal leads in food GIs." },
+        { q: "Which satellite system powers the 'Digi Rover' special land measurement campaign launched in Uttar Pradesh?", a: ["A) NavIC", "B) GNSS", "C) GIS-R", "D) LIDAR"], c: "B", e: "Uses GNSS (Global Navigation Satellite System) for centimetre-level accurate land demarcation across all tehsils." },
+        { q: "The Government raised the procurement price of onions for the Price Stabilisation Buffer to how much per quintal?", a: ["A) Rs 1,875", "B) Rs 2,125", "C) Rs 2,500", "D) Rs 3,000"], c: "B", e: "Raised by 13% from Rs 1,875 to Rs 2,125/quintal. Onion production for 2025-26 is estimated at 307.37 LMT." },
+        { q: "India launched 'Operation Amistad' to provide emergency medical and surgical aid to which earthquake-hit country?", a: ["A) Syria", "B) Turkey", "C) Venezuela", "D) Ecuador"], c: "C", e: "Dispatched 60 Para Field Hospital & BHISHM Cube via IAF C-17s. 'Amistad' means friendship in Spanish." },
+        { q: "Who represented India while chairing the 9th Session of UNCTAD's Intergovernmental Group of Experts on Consumer Protection in Geneva?", a: ["A) Nidhi Khare", "B) Tuhin Kanta Pandey", "C) Rajesh Kumar Singh", "D) Saurabh Vijay"], c: "A", e: "Presided over by Nidhi Khare (Secretary, DCA). Session launched UN Principles for Consumer Product Safety." },
+        { q: "The Central Board of Trustees (CBT) of EPFO recommended what interest rate for EPF accumulations for FY 2025-26?", a: ["A) 8.10%", "B) 8.15%", "C) 8.25%", "D) 8.50%"], c: "C", e: "Maintained at 8.25% for the 3rd consecutive year. Tax-free on employee contributions up to 2.5 lakh/year." },
+        { q: "Who is the author/brainchild behind the book 'Stamps, Coins, and Banknotes Issued During the Premiership of Shri Narendra Modi'?", a: ["A) Sushilkumar Agrawal", "B) Derek O'Brien", "C) Dr. Jayanta Kumar Roy", "D) Shubhanshu Shukla"], c: "A", e: "Brainchild of Sushilkumar Agrawal, Founder & CEO of Mintage World (world's 1st online museum for coins/stamps)." },
+        { q: "According to RBI data, India's external debt stood at how much at the end of March 2026?", a: ["A) $613.5 Billion", "B) $762.8 Billion", "C) $820.4 Billion", "D) $910.0 Billion"], c: "B", e: "External debt rose to $762.8B (Debt-to-GDP ratio rose to 20.8%). US Dollar holds the largest share (55.5%)." },
+        { q: "How many total States and UTs are now covered under the RBI's extended pilot 'Benchmark Issuance Strategy (BIS)'?", a: ["A) 9 States", "B) 18 States + Delhi", "C) 22 States", "D) 28 States"], c: "B", e: "Extended by 10 more jurisdictions (9 states + Delhi), bringing total coverage to 18 States plus Delhi." },
+        { q: "Who has been appointed as Additional (Independent) Director and Part-time Chairman of HDFC Bank?", a: ["A) Keki M. Mistry", "B) Rajiv Kumar", "C) Atanu Chakraborty", "D) Sashidhar Jagdishan"], c: "B", e: "Rajiv Kumar (former Finance Secretary & 25th CEC) appointed for 4 years as Director and 3 years as Chairman." },
+        { q: "IFSCA proposed a draft circular to integrate all GIFT-IFSC regulated entities under which framework?", a: ["A) One Nation One Account", "B) One KYC", "C) FastTrack Onboarding", "D) DigiKYC 2.0"], c: "B", e: "Establishing 'One KYC' framework assigning a unique ID per client across KRAs in GIFT-IFSC." },
+        { q: "Which Indian cross-border payment platform enabled Google Pay Card Payments on its International Payment Gateway?", a: ["A) Razorpay", "B) PayGlocal", "C) Cashfree", "D) CCAvenue"], c: "B", e: "Bengaluru-based PayGlocal enabled Google Pay for international checkout, complementing Apple Pay." },
+        { q: "What is the interest rate on Sukanya Samriddhi Yojana (SSY) for Q2 of FY 2026-27 (July-Sept 2026)?", a: ["A) 7.1%", "B) 7.5%", "C) 7.7%", "D) 8.2%"], c: "D", e: "Maintained unchanged at 8.2% (9th consecutive quarter without change). PPF is 7.1% and NSC is 7.7%." },
+        { q: "Punjab & Sind Bank launched which mobile application for Human Resources management on its 119th Foundation Day?", a: ["A) PSB Connect", "B) Navjyoti", "C) e-HRMS", "D) Samarth"], c: "B", e: "Launched 'Navjyoti' mobile app, CBDC services, Digital Gold Loan, and 'PSB Bharat Connect' salary accounts." },
+        { q: "Who co-chairs the SEBI Expert Working Group constituted to review Debenture Trusteeship regulations (1993)?", a: ["A) Ananta Barua & Rajnish Kumar", "B) Tuhin Kanta Pandey & K. V. Kamath", "C) U. K. Sinha & Arundhati Bhattacharya", "D) Ajay Tyagi & Dinesh Khara"], c: "A", e: "Chaired by Ananta Barua (former WTM SEBI) with Rajnish Kumar (former Chairman SBI) as Co-Chairperson." },
+        { q: "SBI Life Insurance partnered with IIT Bombay to establish a research hub for insurance cyber defence named:", a: ["A) Cyber Shield India", "B) Bharat's AI and Cyber Innovation Hub for Insurance", "C) Suraksha AI Center", "D) DigiRaksha IITB"], c: "B", e: "Established at IIT Bombay focusing on AI, Cybersecurity, Quantum Tech and Digital Insurance." },
+        { q: "Greece became the ___ international country to accept India's Unified Payments Interface (UPI)?", a: ["A) 5th", "B) 8th", "C) 10th", "D) 12th"], c: "C", e: "Greece is the 10th country, via partnership between Eurobank and NIPL (NPCI International)." },
+        { q: "Prudential HCL Health Insurance Limited is a 70:30 JV between Prudential Group Holdings and which company?", a: ["A) Vama Sundari Investments", "B) HCL Technologies", "C) Shiv Nadar Foundation", "D) Max India"], c: "A", e: "Vama Sundari Investments (promoter firm of HCL Group) holds 30%. Takes total SAHI count in India to 8." },
+        { q: "Razorpay joined which mobile-first NetBanking solution launched by NPCI Bharat Bill Pay (NBBL)?", a: ["A) Banking Connect", "B) PayDirect", "C) NetBank Express", "D) Bharat PayHub"], c: "A", e: "Joined 'Banking Connect' providing a single interoperable netbanking rail for merchants." },
+        { q: "Paytm Europe Payments S.A. received a Payment Institution (PI) licence from the financial regulator of which country?", a: ["A) United Kingdom", "B) Luxembourg", "C) Switzerland", "D) Ireland"], c: "B", e: "Granted by CSSF Luxembourg, allowing regulated payment services across all EU member states." },
+        { q: "RBI imposed a monetary penalty of Rs 63.6 lakh on Bank of Baroda primarily for non-compliance with:", a: ["A) Cyber Security Framework", "B) Fair Practices Code for Lenders & KYC norms", "C) Capital Adequacy Ratios", "D) Priority Sector Lending"], c: "B", e: "Penalised for Fair Practices Code for Lenders & KYC compliance failures. GIC Housing Fin got Rs 3.1 lakh fine." },
+        { q: "Indian Coast Guard Ship (ICGS) 'Akshay' commissioned at Goa belongs to which class of vessels?", a: ["A) Offshore Patrol Vessel", "B) Fast Patrol Vessel (FPV)", "C) Missile Corvette", "D) Destroyer"], c: "B", e: "New-generation Fast Patrol Vessel constructed by Goa Shipyard Limited (GSL)." },
+        { q: "Which DRDO laboratory served as the nodal center for developing the 'Netra' AEW&C system?", a: ["A) ADE Bengaluru", "B) CABS Bengaluru", "C) LRDE Bengaluru", "D) LASTEC New Delhi"], c: "B", e: "Centre for Airborne Systems (CABS) Bengaluru, mounted on Embraer ERJ-145 jet platforms." },
+        { q: "How many thematic regional defence manufacturing clusters were proposed under MoD's 'Whole-of-Nation' plan?", a: ["A) 5", "B) 6", "C) 7", "D) 10"], c: "C", e: "7 regional clusters pairing lead states, co-lead states and IITs as academic backbones." },
+        { q: "Where were 3 naval ships - INS Dunagiri, INS Sanshodhak, and INS Agray commissioned simultaneously by PM Modi?", a: ["A) Naval Dockyard Mumbai", "B) Syama Prasad Mookerjee Port, Kolkata", "C) ENC Visakhapatnam", "D) Kochi Shipyard"], c: "B", e: "Built by GRSE Kolkata (which received Navratna status on June 19, 2026). All designed by WDB." },
+        { q: "What is the theme of the 30th edition of the 'Rim of the Pacific (RIMPAC) 2026' naval exercise in Hawaii?", a: ["A) Oceans of Peace", "B) Partners: Integrated and Prepared", "C) Free and Open Indo-Pacific", "D) Combined Maritime Force"], c: "B", e: "Hosted by US Indo-Pacific Command involving 30 nations, 31 surface ships and 30,000 personnel." },
+        { q: "What reform document was released by Defence Minister Rajnath Singh to streamline R&D spending in DRDO?", a: ["A) DFP-2026", "B) DPP-2026", "C) TDF-2026", "D) DAP-2026"], c: "A", e: "'Delegation of Financial Powers to DRDO (DFP-2026)' for trial campaigns, testing, and pre-project R&D." },
+        { q: "The 23rd edition of multinational peacekeeping exercise 'Khaan Quest 2026' was held in which country?", a: ["A) Kazakhstan", "B) Mongolia", "C) Uzbekistan", "D) Kyrgyzstan"], c: "B", e: "Concluded at Five Hills Training Area, Ulaanbaatar, Mongolia. Indian contingent was from Jat Regiment." },
+        { q: "Who became only the 2nd batter in Test cricket history to cross 14,000 runs, after Sachin Tendulkar?", a: ["A) Virat Kohli", "B) Joe Root", "C) Steve Smith", "D) Kane Williamson"], c: "B", e: "Joe Root reached 14,000 runs during the 2nd Test vs New Zealand at The Oval, London." },
+        { q: "Who became India's 96th Chess Grandmaster after winning the 'Chess Summer in Sarajevo' tournament?", a: ["A) Ethan Vaz", "B) Harshavardhan G.B.", "C) Leon Mendonca", "D) Pranav V."], c: "A", e: "14-year-old Ethan Vaz from Goa became India's 96th GM and youngest active GM in India." },
+        { q: "How many total medals did India win to top the medal tally at the ISSF Junior World Championship 2026 in Suhl, Germany?", a: ["A) 18 Medals", "B) 24 Medals (7 Gold, 8 Silver, 9 Bronze)", "C) 30 Medals", "D) 12 Medals"], c: "B", e: "India won 24 medals (7 Gold, 8 Silver, 9 Bronze), topping the tally for the 2nd consecutive edition." },
+        { q: "22-year-old Harshavardhan G.B. of Chennai became India's ____ Chess Grandmaster?", a: ["A) 95th", "B) 96th", "C) 97th", "D) 98th"], c: "C", e: "Became India's 97th GM at the 2nd Chola Chess GM Norm Round Robin Tournament in Chennai." },
+        { q: "England Test cricket captain Ben Stokes announced his retirement from international cricket at the end of which Test?", a: ["A) Lord's Test", "B) The Oval Test", "C) Trent Bridge Test", "D) Edgbaston Test"], c: "C", e: "Announced retirement mid-match, ending international career at the conclusion of Trent Bridge Test." },
+        { q: "Which national football association was suspended by FIFA's Bureau of the Council due to third-party government interference?", a: ["A) All India Football Federation", "B) All Nepal Football Association (ANFA)", "C) Sri Lanka Football", "D) Pakistan Football Federation"], c: "B", e: "ANFA suspended under Article 14 of FIFA Statutes due to governance conflict with Nepal's NSC." },
+        { q: "Who defeated Kidambi Srikanth in the men's singles final of the YONEX US Open 2026?", a: ["A) Chou Tien Chen", "B) Su Li Yang", "C) Kunlavut Vitidsarn", "D) Lee Zii Jia"], c: "B", e: "Su Li Yang of Chinese Taipei won the BWF Super 300 title in Fullerton, California." },
+        { q: "How many gold medals did Team India win at the 'Global Skills Challenge Australia 2026'?", a: ["A) 2 Gold", "B) 3 Gold", "C) 5 Gold", "D) 1 Gold"], c: "B", e: "Won 5 medals total (3 Gold, 1 Silver, 1 Bronze) ahead of 48th WorldSkills in Shanghai." },
+        { q: "IIT Delhi launched a joint Master's and PhD programme in Biological Science with which foreign university?", a: ["A) Oxford University", "B) Sorbonne University, France", "C) MIT, USA", "D) ETH Zurich"], c: "B", e: "Partnered with Sorbonne University, centered around Franco-Indian Integrated Health Campus." },
+        { q: "What is the name of the world's 1st all-girls international satellite mission to the Moon supported by GBU, Space Kidz India & IN-SPACe?", a: ["A) Chandrayaan-G", "B) Mission ShakthiSAT", "C) Nari Shakti Orbit", "D) Luna-Girls 1"], c: "B", e: "Mission ShakthiSAT brings together 12,000 girls from 108 countries for lunar satellite development." },
+        { q: "Where was India's 1st CoE on Plant Cell Fermentation Technology inaugurated by IIT Madras & Herbalife?", a: ["A) Bengaluru", "B) IIT Madras Research Park, Chennai", "C) Hyderabad", "D) Mysuru"], c: "B", e: "Inaugurated at IIT Madras Research Park for biomanufacturing herbal extracts in bioreactors." },
+        { q: "The Office of Principal Scientific Adviser and DSCI launched which platform to standardise Technology Readiness Levels in India?", a: ["A) TRL Compass", "B) TechRadar", "C) DeepTech Matrix", "D) ANRF Portal"], c: "A", e: "TRL Compass (trlcompass.in) adapts 9-level TRL scale for India's research ecosystem." },
+        { q: "IndiGo completed India's 1st Satellite-Based Landing System (SLS) LPV approach using GAGAN at which airport?", a: ["A) Indira Gandhi Airport Delhi", "B) Maharana Pratap Airport, Udaipur", "C) Cochin International Airport", "D) Rajiv Gandhi Airport Hyderabad"], c: "B", e: "Flown by an Airbus A320 at Udaipur using GAGAN (jointly developed by ISRO and AAI)." },
+        { q: "A 24 cubic metre tactical aerostat for surveillance was demonstrated by DRDO DIA-CoE in partnership with:", a: ["A) IIT Bombay", "B) IIT Delhi", "C) IIT Madras", "D) IISc Bengaluru"], c: "B", e: "Developed under DIA-CoE at IIT Delhi (SITEX programmes) by Prof. Mangala Joshi & Prof. B. S. Butola." },
+        { q: "Who succeeded Tapan Kumar Deka as the Director of the Intelligence Bureau (IB) for a 2-year tenure?", a: ["A) Mahesh Dixit", "B) Parama Sen", "C) Sanjay Jaju", "D) Somnath Ghosh"], c: "A", e: "Mahesh Dixit (1993 AP cadre IPS) appointed IB Director. IB was established in 1887." },
+        { q: "Abelardo de la Espriella won the presidential run-off election in which South American nation?", a: ["A) Peru", "B) Colombia", "C) Venezuela", "D) Argentina"], c: "B", e: "Won election under Defensores de la Patria movement, succeeding Gustavo Petro." },
+        { q: "Who was appointed as the new Director of the Vikram Sarabhai Space Centre (VSSC), Thiruvananthapuram?", a: ["A) Dr. S. Unnikrishnan Nair", "B) Dr. A. Rajarajan", "C) Dr. U.P. Rajeev", "D) Dr. Pawan Goenka"], c: "C", e: "Dr. U.P. Rajeev succeeded Dr. A. Rajarajan as Director of VSSC." },
+        { q: "Senior IAS officer Sanjay Jaju was appointed as the new Chief Secretary of which state?", a: ["A) Andhra Pradesh", "B) Telangana", "C) Maharashtra", "D) Karnataka"], c: "B", e: "Appointed CS of Telangana succeeding K. Ramakrishna Rao; additionally holds FAC for Industries & CMO SPEED." },
+        { q: "OpenAI appointed Prabhjeet Singh (former President of Uber India) as its Managing Director for which country/region?", a: ["A) Southeast Asia", "B) India", "C) Middle East", "D) APAC"], c: "B", e: "Appointed MD for India reporting to Kiran Mani (APAC MD). India has 100M+ weekly ChatGPT users." },
+        { q: "The tenure of India's Foreign Secretary Vikram Misri was extended by the ACC up to which date?", a: ["A) Dec 31, 2026", "B) July 14, 2027", "C) March 31, 2027", "D) Oct 15, 2026"], c: "B", e: "Extended for 1 year up to July 14, 2027 under Fundamental Rule 56(d). He is India's 35th Foreign Secretary." },
+        { q: "Ravi Agrawal's tenure as Chairman of Central Board of Direct Taxes (CBDT) was extended on contract for how long?", a: ["A) 3 Months", "B) 6 Months", "C) 1 Year", "D) 2 Years"], c: "B", e: "Reappointed for 6 months (July 1, 2026 to Dec 31, 2026), marking his 3rd term as CBDT Chairman." },
+        { q: "Keiko Fujimori was declared winner of the presidential election runoff in which South American country?", a: ["A) Chile", "B) Peru", "C) Colombia", "D) Bolivia"], c: "B", e: "Eldest daughter of Alberto Fujimori; set to be sworn in on July 28, 2026 for a 5-year term." },
+        { q: "Air Marshal Ashutosh Dixit assumed charge as the ___ Vice Chief of the Air Staff (VCAS)?", a: ["A) 49th", "B) 50th", "C) 51st", "D) 52nd"], c: "C", e: "Assumed charge as 51st VCAS succeeding Air Marshal Nagesh Kapoor." },
+        { q: "Dr. Bijay Kumar Mohanty assumed additional charge as CMD of which Navratna CPSE under MNRE?", a: ["A) SECI", "B) IREDA", "C) NHPC", "D) NTPC"], c: "B", e: "Assumed additional charge as CMD of IREDA for 3 months, succeeding Pradip Kumar Das." },
+        { q: "Who took over as the Chief of Integrated Defence Staff to Chairman Chiefs of Staff Committee (CISC) at HQ IDS?", a: ["A) Air Marshal Ashutosh Dixit", "B) Air Marshal Tejinder Singh", "C) Air Marshal P.V. Shivanand", "D) Lt Gen Sandeep Jain"], c: "B", e: "Air Marshal Tejinder Singh took over as CISC succeeding Air Marshal Ashutosh Dixit." },
+        { q: "Somnath Ghosh was appointed as the next High Commissioner of India to which country?", a: ["A) Singapore", "B) Malaysia", "C) Thailand", "D) Indonesia"], c: "B", e: "Appointed High Commissioner to Malaysia. Bilateral trade stands at ~$23 billion." },
+        { q: "Who assumed charge as the 31st Chief of the Army Staff (COAS), unveiling the 5-pillar 'VIJAY' roadmap?", a: ["A) General Upendra Dwivedi", "B) General Dhiraj Seth", "C) Lt Gen Sandeep Jain", "D) Lt Gen Rajesh Pushkar"], c: "B", e: "General Dhiraj Seth became 31st COAS. Lt Gen Sandeep Jain became Vice Chief of Army Staff." },
+        { q: "Rear Admiral Chandrasekharan Raghuram (Retd.) assumed charge as CMD of which government shipyard?", a: ["A) Mazagon Dock", "B) Hindustan Shipyard Limited (HSL), Visakhapatnam", "C) Cochin Shipyard", "D) Garden Reach Shipbuilders"], c: "B", e: "Took charge as CMD of HSL Visakhapatnam, succeeding Capt Ganti Venkateswarlu." },
+        { q: "Which two Indian women conservationists received the 2026 Whitley Award ('Green Oscar') in London?", a: ["A) Parveen Shaikh & Barkha Subba", "B) Purnima Barman & Sunita Narain", "C) Vandana Shiva & Medha Patkar", "D) Krithi Karanth & Tulsi Gowda"], c: "A", e: "Parveen Shaikh (BNHS, Indian skimmer) and Barkha Subba (Himalayan salamander) won the Whitley Award." },
+        { q: "How many Indian schools were shortlisted in the top 10 for 'World's Best School Prizes 2026' in London?", a: ["A) 3 Schools", "B) 5 Schools", "C) 7 Schools", "D) 10 Schools"], c: "C", e: "7 Indian schools shortlisted (highest single-year count by any nation), founded by T4 Education." },
+        { q: "Viswanathan Anand was conferred the Sports Journalists' Federation of India (SJFI) Medal in Chennai by which Olympic medalist?", a: ["A) K. Srikkanth", "B) V. Baskaran", "C) P. T. Usha", "D) Prakash Padukone"], c: "B", e: "Presented by 1980 Moscow Olympics hockey gold medalist V. Baskaran at Madras Cricket Club." },
+        { q: "The WMO awarded the 'International Meteorological Organization (IMO) Prize' to Dr. Florence Rabier of which country?", a: ["A) United Kingdom", "B) France", "C) Germany", "D) USA"], c: "B", e: "Awarded to Dr. Florence Rabier (France), former DG of ECMWF, for advances in 4D-Var data assimilation." },
+        { q: "Sunil Bharti Mittal received the '2026 Leadership Award' from which bilateral organization in Washington D.C.?", a: ["A) US-India Business Council", "B) US-India Strategic Partnership Forum (USISPF)", "C) CII Indo-US Cell", "D) FICCI Global"], c: "B", e: "Conferred during IX USISPF Leadership Summit alongside Prem Watsa and Christopher Calio." },
+        { q: "Nita Ambani was conferred the 'AAPI Humanitarian Award' and 'Key to the City of Tampa' in which US state?", a: ["A) California", "B) Florida", "C) New York", "D) Texas"], c: "B", e: "Conferred at AAPI convention in Tampa, Florida by Mayor Jane Castor & AAPI President Dr. Amit Chakrabarty." },
+        { q: "ICMR-MINDS won the Gold Award for e-Governance 2026. What does ICMR-MINDS integrate with eSanjeevani?", a: ["A) Cancer Screening", "B) Mental and Substance Use Disorders screening", "C) Diabetes Tracker", "D) Maternal Care AI"], c: "B", e: "Integrates mental & substance use disorder screening with NCDs via AI decision support on eSanjeevani." },
+        { q: "The 'Corporate Mitra Scheme' announced in Union Budget 2026-27 runs for 12 months with academic support on:", a: ["A) DIKSHA", "B) SWAYAM Plus", "C) Skill India Digital", "D) NPTEL"], c: "B", e: "150 hrs online study on SWAYAM Plus + 6 months OJT with ICAI/ICSI/ICMAI for graduates under 30." },
+        { q: "Under PMKSY, 'Per Drop More Crop (PDMC)' offers what percentage financial assistance to small & marginal farmers?", a: ["A) 45%", "B) 55%", "C) 60%", "D) 75%"], c: "B", e: "Offers 55% aid to small/marginal farmers and 45% to others. PMKSY completed over 10 years." },
+        { q: "The 'VB-G-RAM-G' Act replacing MGNREGA provides a statutory guarantee of how many days wage employment per year?", a: ["A) 100 Days", "B) 125 Days", "C) 150 Days", "D) 180 Days"], c: "B", e: "Guarantees 125 days wage employment per year with total budget of Rs 1,51,282 crore. Minimum wage >= Rs 300/day." },
+        { q: "Amit Shah released the 'Vision Document on Narcotics Control (2026-2029)' during which NCORD meeting?", a: ["A) 5th Meeting", "B) 8th Meeting", "C) 10th Apex-Level Meeting", "D) 12th Regional Meet"], c: "C", e: "Chaired 10th NCORD Apex-Level Meeting; launched Online Drug Disposal Fortnight (2.09 lakh kg destroyed)." },
+        { q: "Under which Article of the Constitution of India is the Central Council of Health and Family Welfare (CCHFW) constituted?", a: ["A) Article 243", "B) Article 263", "C) Article 280", "D) Article 356"], c: "B", e: "Constituted under Article 263 (Inter-State Council provision) as apex health advisory body." },
+        { q: "Which Indian university secured the World No. 1 rank for SDG 5 (Gender Equality) in THE Sustainability Impact Ratings 2026?", a: ["A) Lovely Professional University", "B) Manipal Academy of Higher Education (MAHE)", "C) Amrita Vishwa Vidyapeetham", "D) JSS Academy"], c: "B", e: "MAHE ranked World No. 1 for SDG 5. LPU was India's top overall university at 23rd globally and #1 for SDG 7." },
+        { q: "What is India's rank in the 'Sustainable Development Report 2026' released by SDSN?", a: ["A) 82nd", "B) 94th", "C) 99th", "D) 112th"], c: "B", e: "India ranked 94th (score 68.3/100), up from 99th in 2025. Finland topped for 2nd consecutive year." },
+        { q: "ADB approved a $42.2 million facility for bamboo value chain development across how many northeastern states?", a: ["A) 4 States", "B) 6 States", "C) 8 States", "D) All 7 Sisters"], c: "B", e: "Covers 6 states: Assam, Manipur, Meghalaya, Mizoram, Nagaland & Tripura. NE holds 35.8% of India's bamboo." },
+        { q: "The Union Cabinet approved doubling the total Government of India capital commitment to NIIF to:", a: ["A) Rs 40,000 Cr", "B) Rs 50,000 Cr", "C) Rs 60,000 Cr", "D) Rs 1,00,000 Cr"], c: "C", e: "Doubled from Rs 30,000 Cr to Rs 60,000 Cr to support NIIF Infrastructure Fund II (GoI holds 49% stake)." },
+        { q: "ADB approved $182.89 million loan for 'Strengthening Karnataka Public Schools Program' to establish how many integrated clusters?", a: ["A) 250 Clusters", "B) 500 Clusters", "C) 1,000 Clusters", "D) 100 Clusters"], c: "B", e: "Supports 500 integrated school clusters from pre-primary to secondary, complemented by IFFEd grant/guarantee." },
+        { q: "Chennai became the first Indian city to adopt a closed-loop water ring-main approach supported by a ADB loan of:", a: ["A) $150 Million", "B) $230 Million", "C) $300 Million", "D) $500 Million"], c: "B", e: "$230M loan under CCRWSSP to construct 170+ km pipelines and 91.2 km water ring main." },
+        { q: "IIT Bombay signed an LoI with SUNY at Old Westbury marking its 1st overseas presence in which country?", a: ["A) UAE", "B) United States", "C) United Kingdom", "D) Singapore"], c: "B", e: "Signed with SUNY Old Westbury on Long Island, New York for joint degree programs and AI research." },
+        { q: "The 'Yamuna Water Project' MoA signed between Haryana and Rajasthan involves an estimated cost of:", a: ["A) Rs 15,000 Cr", "B) Rs 24,000 Cr", "C) Rs 34,102 Cr", "D) Rs 50,000 Cr"], c: "C", e: "Rs 34,102 Cr project conveying ~580 MCM water via 3 underground pipelines to Shekhawati & Haryana districts." },
+        { q: "India and Saudi Arabia signed an MoU on Cooperation in Water Resources during which conference hosted in Jeddah?", a: ["A) World Water Forum", "B) Saudi Water Week", "C) Gulf Hydro Summit", "D) Red Sea Conference"], c: "B", e: "Signed at 1st Saudi Water Week in Jeddah. Saudi Arabia provides ~16% of India's crude oil imports." },
+        { q: "Ministry of Tourism signed an MoU with Google India structured around Travel Trend Insights, Digital Discovery, and:", a: ["A) Hotel Monetization", "B) Capacity Building", "C) Visa Automation", "D) Airline Ticketing"], c: "B", e: "Structured around 3 pillars: Travel Trend Insights, Digital Discovery, and Capacity Building for officials." },
+        { q: "Air India signed an MoU to develop a global aviation MRO hub with SIAEC based in which country?", a: ["A) France", "B) Singapore", "C) Germany", "D) UAE"], c: "B", e: "Partnered with SIA Engineering Company (SIAEC) Singapore to build world-class MRO ecosystem." },
+        { q: "Agnikul Cosmos partnered with ICEYE (Finland) to manufacture and launch which satellite systems from India?", a: ["A) Optical Hyperspectral", "B) Synthetic Aperture Radar (SAR)", "C) Infrared Thermal", "D) LEO Broadband"], c: "B", e: "MoU signed during BharatInnovates in Nice, France to build & launch SAR satellites using 3D-printed rockets." },
+        { q: "Adani Enterprises and Abu Dhabi's IRH signed an MoU with Odisha for an integrated aluminium project worth:", a: ["A) $5 Billion", "B) $11.5 Billion (Rs 1.08 Lakh Cr)", "C) $20 Billion", "D) $15 Billion"], c: "B", e: "50:50 JV setting up 4 MMTPA alumina refinery in Rayagada, 2 MMTPA smelter in Sundargarh & 4000 MW power plant." },
+        { q: "Under the Bilateral Investment Agreement (BIA) between India & Israel, the local remedies exhaustion period was reduced to:", a: ["A) 1 Year", "B) 3 Years", "C) 5 Years", "D) 7 Years"], c: "B", e: "Reduced from 5 years to 3 years. Israel is the 1st OECD country with which India signed such an agreement." }
+    ];
+
+    const pool = document.getElementById('questions-pool');
+
+    // Populate all questions
+    db.forEach((item, index) => {
+        let optHtml = '';
+        item.a.forEach((opt) => {
+            const letter = opt.substring(0, 1);
+            optHtml += `<div class="option" id="label_${index}_${letter}" onclick="selectRadio('${index}', '${letter}')">
+                <input type="radio" name="q${index}" value="${letter}" id="q_${index}_${letter}" onclick="event.stopPropagation();">
+                <span class="opt-txt">${opt}</span>
+            </div>`;
+        });
+
+        pool.innerHTML += `
+            <div class="q-card" id="card_${index}">
+                <div class="q-text">Q${index + 1}. ${item.q}</div>
+                <div class="options-grid">${optHtml}</div>
+                <div class="exp-box" id="exp_${index}"><strong>Correct Answer: ${item.c}</strong> — ${item.e}</div>
+            </div>
+        `;
+    });
+
+    function selectRadio(qIndex, letter) {
+        const targetRadio = document.getElementById(`q_${qIndex}_${letter}`);
+        if(targetRadio) {
+            targetRadio.checked = true;
+        }
+    }
+
+    function evaluateMetrics() {
+        let correctCount = 0;
+        let totalQuestions = db.length;
+
+        db.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const exp = document.getElementById(`exp_${index}`);
+            
+            if (exp) exp.style.display = 'block';
+
+            // Clear previous choice highlights
+            item.a.forEach(opt => {
+                const letCode = opt.substring(0, 1);
+                document.getElementById(`label_${index}_${letCode}`).classList.remove('correct-choice', 'wrong-choice');
+            });
+
+            // Highlight Correct Answer inside card
+            document.getElementById(`label_${index}_${item.c}`).classList.add('correct-choice');
+
+            if (selected) {
+                if (selected.value === item.c) {
+                    correctCount++;
+                } else {
+                    document.getElementById(`label_${index}_${selected.value}`).classList.add('wrong-choice');
+                }
+            }
+        });
+
+        let wrongCount = totalQuestions - correctCount;
+        let simulatedPercentile = ((correctCount / totalQuestions) * 100).toFixed(1);
+        if (correctCount === totalQuestions) simulatedPercentile = "100.0";
+        else if (correctCount === 0) simulatedPercentile = "0.0";
+        else simulatedPercentile = (parseFloat(simulatedPercentile) - (Math.random() * 1.5)).toFixed(1);
+
+        // Update Dashboard Stats
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('scoreText').innerText = `Absolute Score: ${correctCount} / ${totalQuestions}`;
+        document.getElementById('percentileText').innerText = `Simulated Competitive Rank: ${simulatedPercentile}%`;
+        document.getElementById('correctCount').innerText = correctCount;
+        document.getElementById('wrongCount').innerText = wrongCount;
+
+        // Render True 3D Donut/Pie Chart via Highcharts
+        Highcharts.chart('chart3DContainer', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                options3d: {
+                    enabled: true,
+                    alpha: 45,
+                    beta: 0
+                }
+            },
+            title: { text: '' },
+            accessibility: { point: { valueSuffix: '%' } },
+            tooltip: { pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>' },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 45,
+                    innerSize: 50,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}: {point.y}',
+                        style: { color: '#ffffff', fontSize: '12px' }
+                    }
+                }
+            },
+            series: [{
+                name: 'Questions',
+                data: [
+                    { name: 'Correct', y: correctCount, color: '#10b981', sliced: true, selected: true },
+                    { name: 'Wrong/Unattempted', y: wrongCount, color: '#ef4444' }
+                ]
+            }],
+            credits: { enabled: false }
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
