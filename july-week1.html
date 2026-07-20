@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>July 2026 Current Affairs - 3D Analytics Dashboard</title>
-    <!-- Highcharts 3D Libraries for True 3D Pie Chart -->
+    <title>July 2026 Current Affairs - 3D Grand Analytics Portal</title>
+    <!-- Highcharts 3D Engine -->
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/highcharts-3d.js"></script>
     <style>
@@ -126,6 +126,7 @@
             align-items: center;
             font-size: 14px;
             transition: all 0.2s;
+            user-select: none;
         }
 
         .option:hover {
@@ -137,6 +138,7 @@
             margin-right: 12px;
             accent-color: var(--accent);
             transform: scale(1.1);
+            pointer-events: none;
         }
 
         .exp-box {
@@ -201,7 +203,7 @@
     <div class="glass-header">
         <h1>July 2026 Current Affairs Pro Engine</h1>
         <p style="margin: 8px 0 0 0; font-size: 13.5px; color: var(--text-muted);">
-            Complete 95 Topics 3D Interactive Examination Portal
+            Complete 95 Topics 3D Interactive Portal with Toggle-Deselect Feature
         </p>
     </div>
 
@@ -226,7 +228,7 @@
 </div>
 
 <script>
-    // Complete database covering all 95 topics from the July 2026 PDF
+    // Complete database mapping all 95 topics from the July 2026 PDF
     const db = [
         { q: "Adani Airport City Ltd (AACL) plans to invest over Rs 20,000 crore across 6 airports spanning how many acres in Phase 1?", a: ["A) 450 acres", "B) 520 acres", "C) 655 acres", "D) 800 acres"], c: "C", e: "Spans 655 acres across 6 airports with ~22 million sq. ft. developed area. Also launched 'Harit Amrit' organic fertilizer brand." },
         { q: "Where was the concluding National Awareness Programme of 'Nasha Mukt Bharat Saptah' held?", a: ["A) AIIMS New Delhi", "B) Dev Sanskriti Vishwavidyalaya, Haridwar", "C) Panjab University, Chandigarh", "D) BHU Varanasi"], c: "B", e: "Led by Dr. Virendra Kumar under theme 'Nasha Mukt Bharat Abhiyaan - Viksit Bharat Ki Pehchaan'." },
@@ -327,13 +329,13 @@
 
     const pool = document.getElementById('questions-pool');
 
-    // Populate all questions
+    // Render questions
     db.forEach((item, index) => {
         let optHtml = '';
         item.a.forEach((opt) => {
             const letter = opt.substring(0, 1);
-            optHtml += `<div class="option" id="label_${index}_${letter}" onclick="selectRadio('${index}', '${letter}')">
-                <input type="radio" name="q${index}" value="${letter}" id="q_${index}_${letter}" onclick="event.stopPropagation();">
+            optHtml += `<div class="option" id="label_${index}_${letter}" onclick="toggleOption('${index}', '${letter}')">
+                <input type="radio" name="q${index}" value="${letter}" id="q_${index}_${letter}" data-waschecked="false">
                 <span class="opt-txt">${opt}</span>
             </div>`;
         });
@@ -347,10 +349,23 @@
         `;
     });
 
-    function selectRadio(qIndex, letter) {
+    // Toggle Selection / Deselect Handler Logic
+    function toggleOption(qIndex, letter) {
         const targetRadio = document.getElementById(`q_${qIndex}_${letter}`);
-        if(targetRadio) {
+        if (!targetRadio) return;
+
+        const isAlreadyChecked = targetRadio.dataset.waschecked === "true";
+
+        // Reset state for all radio inputs of this question
+        document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r => {
+            r.checked = false;
+            r.dataset.waschecked = "false";
+        });
+
+        // Toggle logic: If it was NOT checked previously, set it to checked
+        if (!isAlreadyChecked) {
             targetRadio.checked = true;
+            targetRadio.dataset.waschecked = "true";
         }
     }
 
