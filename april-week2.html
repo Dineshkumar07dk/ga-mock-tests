@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>April 2026 CA (Weekly 2) - 3D Grand Analytics Portal</title>
+    <!-- Highcharts 3D Engine -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+            --correct-color: #10b981;
+            --wrong-color: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        .glass-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-header h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard {
+            display: none;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        #chart3DContainer {
+            width: 100%;
+            height: 280px;
+        }
+
+        .stats-box {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .stat-line {
+            font-size: 17px;
+            margin: 12px 0;
+            font-weight: 600;
+        }
+
+        .q-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 25px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .q-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .q-text {
+            font-size: 15.5px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .option input {
+            margin-right: 12px;
+            accent-color: var(--accent);
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .exp-box {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            font-size: 13.5px;
+            color: #cbd5e1;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+        }
+
+        .btn-action {
+            width: 100%;
+            background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn-action:hover {
+            background: linear-gradient(90deg, #4f46e5 0%, #4338ca 100%);
+        }
+
+        .option.correct-choice { 
+            background: rgba(16, 185, 129, 0.18) !important; 
+            border-color: var(--correct-color) !important; 
+            color: #a7f3d0; 
+            font-weight: 600; 
+        }
+        
+        .option.wrong-choice { 
+            background: rgba(239, 68, 68, 0.18) !important; 
+            border-color: var(--wrong-color) !important; 
+            color: #fca5a5; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 650px) {
+            .analytics-grid { grid-template-columns: 1fr; text-align: center; }
+            .stats-box { padding-left: 0; margin-top: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="glass-header">
+        <h1>April 2026 Current Affairs (Weekly 2) Pro Engine</h1>
+        <p style="margin: 8px 0 0 0; font-size: 13.5px; color: var(--text-muted);">
+            Complete 92 Topics 3D Interactive Examination Portal (April 8-15 Compilation)
+        </p>
+    </div>
+
+    <!-- Analytics Dashboard with True 3D Chart -->
+    <div id="dashboard" class="dashboard">
+        <h2 style="margin: 0 0 10px 0; color: var(--accent); text-align: center; font-size: 20px;">Performance Analytics</h2>
+        <div class="analytics-grid">
+            <div id="chart3DContainer"></div>
+            <div class="stats-box">
+                <div class="stat-line" id="scoreText" style="color: #6366f1;"></div>
+                <div class="stat-line" id="percentileText" style="color: #a855f7;"></div>
+                <div class="stat-line" style="color: var(--correct-color);">Correct Answers: <span id="correctCount"></span></div>
+                <div class="stat-line" style="color: var(--wrong-color);">Wrong/Unattempted: <span id="wrongCount"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <div id="questions-pool"></div>
+        <button type="button" class="btn-action" onclick="evaluateMetrics()">Submit Test & Render 3D Chart</button>
+    </form>
+</div>
+
+<script>
+    // Complete database mapping all 92 topics from April 2026 Weekly PDF 2
+    const db = [
+        { q: "India's first 500 MWe Prototype Fast Breeder Reactor (PFBR) at Kalpakkam attained 1st criticality on April 6, 2026. Which entity developed it?", a: ["A) NPCIL", "B) BHAVINI", "C) BARC", "D) BHEL"], c: "B", e: "Developed by Bharatiya Nabhikiya Vidyut Nigam Ltd (BHAVINI), marking Stage 2 of India's 3-stage nuclear programme." },
+        { q: "What was India's highest-ever annual wind capacity addition recorded in FY26?", a: ["A) 4.5 GW", "B) 5.5 GW", "C) 6.05 GW", "D) 7.2 GW"], c: "C", e: "Installed 6.05 GW in FY26 (up 46% from FY25), pushing total capacity past 56 GW." },
+        { q: "Which 19th-century Raja Ravi Varma painting became the highest-valued Indian artwork ever sold at auction (Rs 167.20 Cr)?", a: ["A) Shakuntala", "B) Untitled (Gram Yatra)", "C) Yashoda and Krishna", "D) Damayanti"], c: "C", e: "Sold for Rs 167.20 Cr at Saffronart to Cyrus S. Poonawalla, surpassing M.F. Husain's record." },
+        { q: "The world's 2nd 'Vikramaditya Vedic Clock' was installed at which holy site?", a: ["A) Mahakaleshwar Temple, Ujjain", "B) Kashi Vishwanath Temple, Varanasi", "C) Somnath Temple, Gujarat", "D) Kedarnath Temple"], c: "B", e: "Installed at Kashi Vishwanath, Varanasi by MP Govt (1st was in Ujjain). Divides day into 30 muhurtas (~48 mins each)." },
+        { q: "What total cargo volume was handled by major ports under MoPSW during FY26?", a: ["A) 850.5 MT", "B) 904.0 MT", "C) 915.17 MT", "D) 1000.0 MT"], c: "C", e: "Handled 915.17 MT (surpassing 904 MT target). Deendayal Port topped with 160.11 MT." },
+        { q: "Which company became the 1st FMCG firm in India to cross the Rs 1 trillion turnover milestone in FY26?", a: ["A) Hindustan Unilever", "B) Amul (GCMMF)", "C) Nestlé India", "D) ITC Limited"], c: "B", e: "Amul (GCMMF) crossed Rs 1 trillion turnover with Rs 73,450 Cr revenue in FY26 (up 11.4%)." },
+        { q: "Which state government officially declared Cancer a notifiable disease across all healthcare facilities?", a: ["A) Andhra Pradesh", "B) Telangana", "C) Tamil Nadu", "D) Karnataka"], c: "B", e: "Telangana declared cancer notifiable; Mehdi Nawaz Jung Institute in Hyderabad designated as CoE." },
+        { q: "Which 2 institutions were notified as repositories under Section 39 of the Biological Diversity Act, 2002?", a: ["A) CMLRE Kochi & ARI Pune", "B) CCMB Hyderabad & NCBS Bengaluru", "C) NII Delhi & IISc Bengaluru", "D) NIO Goa & ZSI Kolkata"], c: "A", e: "Referral Centre 'Bhavasagara' at CMLRE Kochi and MACS Collection at ARI Pune bringing total designated repositories to 18." },
+        { q: "Regional Passport Office (RPO) Bhopal became 1st in India to introduce which accessibility feature for visually impaired applicants?", a: ["A) Audio Passports", "B) Braille Script Booklets & Signage", "C) Tactile QR Passports", "D) Screen Reader App"], c: "B", e: "Introduced Braille booklets, Braille signage, sign language videos with QR codes, and a 24-hr grievance cell." },
+        { q: "What is the total subsidy approved by CCEA for Phosphatic & Potassic (P&K) fertilizers for Kharif 2025-26?", a: ["A) Rs 30,000 Cr", "B) Rs 41,534 Cr", "C) Rs 52,000 Cr", "D) Rs 1,70,799 Cr"], c: "B", e: "Approved Rs 41,534 Cr (up 12% YoY) under Nutrient Based Subsidy (NBS) scheme." },
+        { q: "Which state launched the 'AI-Enabled Education Campaign' in partnership with Google for 2 lakh+ teachers?", a: ["A) Maharashtra", "B) Chhattisgarh", "C) Odisha", "D) Rajasthan"], c: "B", e: "Launched by Chhattisgarh with LOI signed between Raipur District Administration and Google." },
+        { q: "The 1,200 MW Kalai-II Hydroelectric project in Arunachal Pradesh is built on which river?", a: ["A) Subansiri River", "B) Dibang River", "C) Lohit River", "D) Kameng River"], c: "C", e: "Built on Lohit River in Anjaw district (Cost Rs 14,000 Cr, JV between THDC India & AP Govt)." },
+        { q: "What is the name of the saree-clad humanoid robot deployed to assist voters in Puducherry Assembly election?", a: ["A) Rashmi", "B) Nila", "C) Sophia", "D) Mitra"], c: "B", e: "'Nila' talks interactively in English and Tamil to welcome and guide voters." },
+        { q: "The 'Aluminium Bharat' initiative was launched by which organization to address 40-50% downstream production drop?", a: ["A) BALCO", "B) ALEMAI", "C) NALCO", "D) Hindalco"], c: "B", e: "Launched by Aluminium Extrusion Manufacturers Association of India (ALEMAI)." },
+        { q: "ICAR's 'Mera Gaon Mera Gaurav' campaign will be intensified with a renewed focus on how many aspirational districts?", a: ["A) 50", "B) 75", "C) 100", "D) 115"], c: "C", e: "Intensified in 100 aspirational districts via Special Task Force (STF) chaired by DARE Secretary/ICAR DG." },
+        { q: "What is the total corpus of the 'Skills Outcomes Fund' launched by Minister Jayant Chaudhary?", a: ["A) Rs 250 Cr", "B) Rs 530 Cr", "C) Rs 1,000 Cr", "D) Rs 2,500 Cr"], c: "B", e: "Rs 530 Cr outcomes-based financing (OBF) initiative managed by NSDC under MSDE." },
+        { q: "Where has the first Danish Chamber of Commerce in India been established?", a: ["A) Mumbai", "B) Bengaluru", "C) New Delhi", "D) Chennai"], c: "C", e: "Established in New Delhi, supported by Embassy of Denmark and Confederation of Danish Industry." },
+        { q: "Vice President C. P. Radhakrishnan released the Constitution of India in Sindhi language in which scripts?", a: ["A) Devanagari & Gurmukhi", "B) Devanagari & Persian", "C) Persian & Arabic", "D) Devanagari & Roman"], c: "B", e: "Released in Devanagari and Persian scripts. Sindhi was included in 8th Schedule via 21st Amendment in 1967." },
+        { q: "NHAI's 'Arogya Van' initiative involves planting how many medicinal trees in Phase 1 along National Highways?", a: ["A) 36,000", "B) 50,000", "C) 67,462", "D) 1,00,000"], c: "C", e: "Phase 1 covers 17 land parcels (62.8 hectares) planting 67,462 trees across 36 medicinal species." },
+        { q: "Vantara announced the world's 1st integrated global University for Wildlife & Veterinary Sciences in which city?", a: ["A) Junagadh", "B) Jamnagar", "C) Anand", "D) Gandhinagar"], c: "B", e: "Laid in Jamnagar, Gujarat by Anant, Radhika & Mukesh Ambani." },
+        { q: "The mobile app developed by ICMR for Community Health Officers uses what color for immediate life-threat alerts?", a: ["A) Green", "B) Yellow", "C) Orange", "D) Red"], c: "D", e: "Red = Immediate life threat/urgent referral, Orange = Specialist evaluation, Yellow = Mild/Moderate, Green = Mild." },
+        { q: "What is the total capital corpus allocated for 'Startup India Fund of Funds 2.0 (FoF 2.0)'?", a: ["A) Rs 5,000 Cr", "B) Rs 10,000 Cr", "C) Rs 15,000 Cr", "D) Rs 20,000 Cr"], c: "B", e: "Rs 10,000 Cr corpus managed by DPIIT targeting deeptech, micro-VCs, and tech manufacturing." },
+        { q: "The 'Cyber Security Capacity Building Programme' by NCC & NIELIT consists of a 15-hr online module and a ___ offline module?", a: ["A) 30-hour", "B) 45-hour", "C) 60-hour", "D) 90-hour"], c: "C", e: "15-hr Cyber Security Awareness online + 60-hr Cyber Defender merit-based offline module." },
+        { q: "Central Ayurveda Research Institute (CARI) in Bengaluru became 1st under CCRAS to receive which ISO accreditation?", a: ["A) ISO 9001", "B) ISO 14001", "C) ISO 15189", "D) ISO 27001"], c: "C", e: "Received ISO 15189 Accreditation for biochemistry and haematology clinical laboratories." },
+        { q: "What rank does India hold globally in total renewable energy installed capacity according to Renewable Energy Statistics 2026?", a: ["A) 1st", "B) 2nd", "C) 3rd", "D) 4th"], c: "C", e: "Ranks 3rd globally (surpassing Brazil, trailing China & US) with non-fossil capacity of 283.46 GW." },
+        { q: "To which UN ECOSOC subsidiary body was Indian Ambassador Preeti Saran re-elected (2027-2030)?", a: ["A) CSTD", "B) Committee on NGOs", "C) Committee on Economic, Social & Cultural Rights", "D) CPC"], c: "C", e: "Re-elected to Committee on Economic, Social and Cultural Rights (CESCR)." },
+        { q: "India received its 1st shipments of Iranian crude in April 2026 after 7 years via MT Jaya and MT Felicity at which ports?", a: ["A) Mumbai & JNPT", "B) Paradip & Sikka", "C) Visakhapatnam & Chennai", "D) Kandla & Mundra"], c: "B", e: "Anchored off Paradip (Odisha) and Sikka (Gujarat) under a 30-day US sanctions waiver." },
+        { q: "Which country became the world's 1st '10 giga' nation by launching a commercial upper 6GHz (U6GHz) network?", a: ["A) South Korea", "B) Japan", "C) United Arab Emirates (UAE)", "D) Singapore"], c: "C", e: "UAE launched commercial U6GHz network delivering 10Gbps downloads at SAMENA Summit." },
+        { q: "Razorpay partnered with OpenAI to allow developers to embed payment acceptance via which platform?", a: ["A) ChatGPT Enterprise", "B) Codex & Razorpay MCP Server", "C) DALL-E API", "D) Whisper AI"], c: "B", e: "Connects Razorpay MCP Server inside Codex and integrates conversational accounting into ChatGPT." },
+        { q: "Under RBI's proposed BC framework, fixed-location 'BC-Banking Outlets (BC-BOs)' must operate for at least:", a: ["A) 2 hrs/day, 3 days/wk", "B) 4 hrs/day, 5 days/wk", "C) 6 hrs/day, 6 days/wk", "D) 8 hrs/day, 5 days/wk"], c: "B", e: "BC-BOs must operate min 4 hrs/day, 5 days/week. Existing Business Facilitators must transition by Sept 30, 2026." },
+        { q: "IRDAI constituted a dedicated sub-committee under its Insurance Advisory Committee working with 5 groups of which body?", a: ["A) FICCI", "B) ASSOCHAM", "C) CII", "D) PHDCCI"], c: "C", e: "Working with 5 Confederation of Indian Industry (CII) groups to review private health insurance." },
+        { q: "What is the revised absolute total FPI investment limit in debt for H2 FY27 (Oct 2026-Mar 2027)?", a: ["A) Rs 14,70,655 Cr", "B) Rs 15,51,646 Cr", "C) Rs 16,32,640 Cr", "D) Rs 20,000,000 Cr"], c: "C", e: "Revises upward to Rs 16,32,640 Cr while percentage limits remain 6% G-Sec, 2% SGS, 15% Corporate." },
+        { q: "DBS Bank India launched 'DBS Aspire' proposition for clients with what minimum monthly savings average balance?", a: ["A) Rs 50,000", "B) Rs 1 Lakh", "C) Rs 2 Lakh", "D) Rs 5 Lakh"], c: "C", e: "Extends to TRV of Rs 10 Lakh or min monthly savings balance of Rs 2 Lakh (complements DBS Treasures)." },
+        { q: "Bank of Baroda's AI-powered multilingual platform 'bob SAMVAD' enables real-time communication across how many languages?", a: ["A) 12", "B) 18", "C) 22", "D) 25"], c: "C", e: "In-house AI speech platform supporting 22 languages across 250 initial branches." },
+        { q: "SEBI extended the validity of IPO observation letters expiring between April 1 and Sept 30, 2026 up to:", a: ["A) Dec 31, 2026", "B) Sept 30, 2026", "C) March 31, 2027", "D) June 30, 2027"], c: "B", e: "One-time extension till Sept 30, 2026 to ease capital market resource mobilisation." },
+        { q: "Which consumer lending startup became 2026's 3rd unicorn after raising $280 million at a $1.5 billion valuation?", a: ["A) Neysa", "B) Juspay", "C) KreditBee", "D) Navi"], c: "C", e: "KreditBee reached $1.5B valuation following Neysa and Juspay in 2026." },
+        { q: "Under RBI proposals, small non-deposit taking NBFCs with no public funds & customer interface can deregister if assets are below:", a: ["A) Rs 100 Cr", "B) Rs 500 Cr", "C) Rs 1,000 Cr", "D) Rs 2,000 Cr"], c: "C", e: "Exempts entities with assets < Rs 1,000 Cr via voluntary application on PRAVAAH portal by Sept 30, 2026." },
+        { q: "Canara HSBC Life Insurance launched 'Promise4Wealth' ULIP featuring zero allocation charge and 3 variants: Maximiser, Shield, and:", a: ["A) SecureLife", "B) LongLife", "C) WealthPlus", "D) FutureShield"], c: "B", e: "Variants: Maximiser, Shield, and LongLife (providing cover up to age 100)." },
+        { q: "Punjab National Bank (PNB) partnered with Government e-Marketplace (GeM) to provide unsecured credit under which initiative?", a: ["A) GeM Credit", "B) GeM Sahay", "C) GeM Samriddhi", "D) GeM Dhan"], c: "B", e: "Onboards PNB as lending partner on 'GeM Sahay' platform for short-term purchase order financing." },
+        { q: "The RBI MPC kept the repo rate unchanged at 5.25% in April 2026. What was the GDP growth projection for FY 2026-27?", a: ["A) 6.5%", "B) 6.7%", "C) 6.9%", "D) 7.2%"], c: "C", e: "Kept Repo rate at 5.25% with Neutral stance. FY27 GDP projected at 6.9%." },
+        { q: "Which requirement did RBI propose to drop for MSMEs onboarding the TReDS platform?", a: ["A) GST Registration", "B) Due Diligence Requirement", "C) Bank Guarantee", "D) PAN Verification"], c: "B", e: "Proposed dropping due diligence requirements to promote ease of doing business for MSMEs." },
+        { q: "RBI mandated that banks reconcile Nostro account receipts with a maximum gap not exceeding:", a: ["A) 15 Minutes", "B) 30 Minutes", "C) 1 Hour", "D) 2 Hours"], c: "C", e: "Gap must not exceed 1 hour. Also conducted 7-day VRRR auction for Rs 2 trillion." },
+        { q: "The Ministry of Coal recognized Insurance Surety Bonds (ISBs) as an alternative to BGs under which rules?", a: ["A) Companies Act 2013", "B) General Financial Rules (GFR) 2017", "C) PMLA 2002", "D) Coal Mines Act"], c: "B", e: "Recognized under Rules 170(i) and 171(i) of GFR 2017 for bid and performance security." },
+        { q: "CSB Bank launched its 'Smart Save Account' offering auto-sweep FDs with up to what interest rate on a 13-month tenure?", a: ["A) 6.5%", "B) 7.0%", "C) 7.5%", "D) 8.0%"], c: "B", e: "1st retail launch after core banking upgrade offering 7% interest on sweep-in FDs." },
+        { q: "In its digital payment safeguards paper, RBI proposed a 1-hour cooling-off period for transfers exceeding what threshold?", a: ["A) Rs 5,000", "B) Rs 10,000", "C) Rs 25,000", "D) Rs 50,000"], c: "B", e: "1-hr cooling period for APP transfers > Rs 10,000 ('golden hour' rule). Capped mule account annual credits at Rs 25 lakh." },
+        { q: "PPFAS Asset Management received approval from PFRDA to become a sponsor for a pension fund under which scheme?", a: ["A) APY", "B) NPS", "C) PM-SYM", "D) EPF"], c: "B", e: "Approved to manage retirement savings under National Pension System (NPS)." },
+        { q: "How many banks and payment aggregators are live on NBBL's 'Banking Connect' platform after Axis Bank joined?", a: ["A) 5 Banks, 8 PAs", "B) 8 Banks, 11 PAs", "C) 12 Banks, 15 PAs", "D) 10 Banks, 10 PAs"], c: "B", e: "8 major banks (SBI, HDFC, ICICI, Axis, YES, AU SFB, Federal, IDFC FIRST) & 11 PAs." },
+        { q: "What is the medium-term strategy framework unveiled by RBI for FY26-29 featuring 49 deliverables across 6 pillars?", a: ["A) Utkarsh 2022", "B) Utkarsh 2029", "C) Vision 2030", "D) Samriddhi 2029"], c: "B", e: "'Utkarsh 2029' lays out RBI's medium-term roadmap, including AI/LLM development and AI sandboxes." },
+        { q: "Bank of Baroda partnered with Reliance Jio to launch which lightweight banking app pre-installed on JioPhone Prima 4G?", a: ["A) bob World", "B) bob World Lite", "C) bob Express", "D) JioBank Lite"], c: "B", e: "'bob World Lite' designed specifically for feature phone users using low-bandwidth architecture." },
+        { q: "IRDAI granted R1 approval to M Pallonji Group (51% stake) for a general insurance venture in partnership with:", a: ["A) HDFC Bank", "B) Federal Bank & Divya Sehgal", "C) ICICI Bank", "D) Axis Bank"], c: "B", e: "R1 approval granted for new general insurance venture backed by Mehli & Pheroze Mistry." },
+        { q: "Under NPCI guidelines enabled by Paytm, biometric-based UPI payments without PIN are capped at what limit per transaction?", a: ["A) Rs 2,000", "B) Rs 5,000", "C) Rs 10,000", "D) Rs 25,000"], c: "B", e: "Biometric UPI capped at Rs 5,000 per payment. Cardless ATM QR withdrawals supported up to Rs 10,000." },
+        { q: "The 4th edition of Joint Special Forces exercise 'Exercise Cyclone-IV' between India and Egypt was conducted at:", a: ["A) Umroi, Meghalaya", "B) Anshas, Egypt", "C) Mahajan, Rajasthan", "D) Cairo, Egypt"], c: "B", e: "Conducted at Anshas, Egypt involving 25 personnel from elite Special Forces." },
+        { q: "The 7th edition of India-Uzbekistan joint military exercise 'Exercise Dustlik' took place at:", a: ["A) Aundh, Pune", "B) Gurumsaray, Namangan, Uzbekistan", "C) Tashkent", "D) Foreign Training Node, Umroi"], c: "B", e: "Held at Gurumsaray Field Training Area, Uzbekistan with 60 Indian personnel (Mahar Regiment & IAF)." },
+        { q: "Ayush Shetty won India's 1st silver medal in men's singles at Badminton Asia Championships 2026 after losing to:", a: ["A) Dinesh Khanna", "B) Shi Yuqi", "C) An Se-young", "D) Chou Tien Chen"], c: "B", e: "Ayush Shetty won Silver losing to World No. 2 Shi Yuqi at Ningbo, China." },
+        { q: "India finished 2nd at the Asian Boxing Championships 2026 with 16 medals. Which country topped with 6 gold medals?", a: ["A) Uzbekistan", "B) Kazakhstan", "C) China", "D) Thailand"], c: "B", e: "Kazakhstan topped overall with 6 Golds. India won 16 total medals (5 Gold, 3 Silver, 8 Bronze)." },
+        { q: "How many total medals did India win at the Asian Wrestling Championships 2026 in Bishkek, Kyrgyzstan?", a: ["A) 12 Medals", "B) 17 Medals (2 Gold, 6 Silver, 9 Bronze)", "C) 21 Medals", "D) 25 Medals"], c: "B", e: "Won 17 medals total. Sujeet Kalkal (65kg) and Abhimanyou Mandwal (70kg) won Gold in freestyle." },
+        { q: "Jannik Sinner won Monte Carlo Masters 2026 defeating Carlos Alcaraz. Who won the Men's Doubles title?", a: ["A) Arevalo & Pavic", "B) Kevin Krawietz & Tim Pütz", "C) Bopanna & Ebden", "D) Ram & Salisbury"], c: "B", e: "Krawietz and Pütz became 1st all-German pair to win Monte Carlo doubles since 1992." },
+        { q: "Who became 1st Indian woman & 2nd woman globally to cycle to Mt. Everest Base Camp (17,560 ft) in 14 days?", a: ["A) Tammat Bil Khoar", "B) Divya Singh", "C) Uma Singh", "D) Bachendri Pal"], c: "B", e: "Divya Singh, a 28-yr-old teacher from Gorakhpur, cycled from Kathmandu to EBC in 14 days." },
+        { q: "Under Mission Mausam, a permanent Seismological Observatory and a Doppler Weather Radar are set up in J&K's:", a: ["A) Jammu & Srinagar", "B) Kishtwar & Doda districts", "C) Leh & Kargil", "D) Udhampur & Reasi"], c: "B", e: "Seismological Observatory in Kishtwar district and Doppler Weather Radar in Doda district." },
+        { q: "Meta released its small, fast reasoning AI model 'Muse Spark' succeeding which model series?", a: ["A) Llama 3", "B) Llama 4", "C) Gemini 1.5", "D) Claude 3"], c: "B", e: "Muse Spark succeeds Llama 4, developed by Meta Superintelligence Labs." },
+        { q: "In ISRO's 2nd Integrated Air Drop Test (IADT-02) for Gaganyaan, the 5.7-tonne Crew Module was dropped using which helicopter?", a: ["A) Mi-17", "B) IAF Chinook", "C) Apache AH-64", "D) ALH Dhruv"], c: "B", e: "Lifted to 3 km altitude by an IAF Chinook helicopter over Sriharikota sea drop zone." },
+        { q: "India's 1st open-access Quantum Reference Facilities (AQRF) featuring 'Quantum 15 and 1Q' testbeds was launched in:", a: ["A) Bengaluru", "B) Amaravati, Andhra Pradesh", "C) Hyderabad", "D) Pune"], c: "B", e: "Inaugurated by AP CM Chandrababu Naidu on World Quantum Day (April 14) under AQV program." },
+        { q: "Nvidia announced an open-source AI model suite for quantum computing error correction named:", a: ["A) Q-Suite", "B) Ising", "C) Quantum-AI", "D) CUDA-Q"], c: "B", e: "'Ising' family includes Ising Calibration and Ising Decoding for quantum processor tuning." },
+        { q: "Which 3 IT platforms were launched by SEBI to boost ease of business and cybersecurity supervision?", a: ["A) SCORES, SCOPE, C-SAC", "B) SUPCOMS, e-adjudication, C-SAC", "C) PRAVAAH, SUPCOMS, SAMVAD", "D) FAST, C-SAC, DIGI-SEBI"], c: "B", e: "SUPCOMS (communications), e-adjudication (quasi-judicial portal), and C-SAC (cybersecurity audit AI)." },
+        { q: "Who took charge as Managing Director & CEO of Yes Bank on April 6, 2026 for a 3-year term?", a: ["A) Prashant Kumar", "B) Vinay Muralidhar Tonse", "C) Debadatta Chand", "D) Ashok Chandra"], c: "B", e: "Vinay Muralidhar Tonse (former SBI MD) replaced Prashant Kumar. Japan's SMBC holds ~24% stake." },
+        { q: "UB Pravin Rao (former Infosys COO) was appointed as Chairperson of which tech foundation?", a: ["A) NASSCOM", "B) Nasscom Foundation", "C) Wadhwani Foundation", "D) DSCI"], c: "B", e: "Appointed Chairperson of Nasscom Foundation succeeding Rostow Ravanan." },
+        { q: "Open Network for Digital Commerce (ONDC) promoted whom as its regular MD & CEO in April 2026?", a: ["A) Thampy Koshy", "B) Vibhor Jain", "C) Rohit Lohia", "D) Manoj Thakur"], c: "B", e: "Vibhor Jain promoted as MD & CEO. Rohit Lohia appointed CBO and Manoj Thakur appointed CTO." },
+        { q: "Who was named Chairman and Managing Director of Bharat Petroleum Corporation Ltd (BPCL)?", a: ["A) G Krishnakumar", "B) Sanjay Khanna", "C) Arun Kumar Singh", "D) V. R. K. Gupta"], c: "B", e: "Sanjay Khanna named CMD of BPCL; announced Rs 75,000 Cr investment including Rs 50,000 Cr Bina expansion." },
+        { q: "Sunil Bajpai assumed charge as Principal Chief Commissioner of Income Tax for which jurisdiction?", a: ["A) Maharashtra & Goa", "B) Tamil Nadu & Puducherry", "C) Delhi & Haryana", "D) Karnataka & Kerala"], c: "B", e: "1990-batch IRS officer Sunil Bajpai assumed charge for Tamil Nadu & Puducherry." },
+        { q: "Lieutenant General Susan Coyle was appointed as the 1st female Chief of Army in the 125-year history of which nation?", a: ["A) New Zealand", "B) Australia", "C) United Kingdom", "D) Canada"], c: "B", e: "Appointed Chief of Army of Australia w.e.f. July 2026. Vice Admiral Mark Hammond becomes Chief of Defence Force." },
+        { q: "Ismail Omar Guelleh was re-elected for a 6th presidential term with 97.81% votes in which African nation?", a: ["A) Eritrea", "B) Djibouti", "C) Somalia", "D) Ethiopia"], c: "B", e: "Re-elected President of Djibouti. Djibouti hosts military bases for US, China, France and Japan." },
+        { q: "How many total loans worth Rs 40.07 lakh crore have been sanctioned under Pradhan Mantri Mudra Yojana (PMMY) in 11 years?", a: ["A) 25.50 Cr", "B) 40.10 Cr", "C) 57.79 Cr", "D) 75.00 Cr"], c: "C", e: "57.79 Cr loans worth Rs 40.07 lakh Cr sanctioned since 2015. 2/3rd share to women, 1/5th to first-time entrepreneurs." },
+        { q: "India officially withdrew its proposal to host which UN Climate Summit in 2028?", a: ["A) COP 29", "B) COP 30", "C) COP 33", "D) COP 35"], c: "C", e: "Withdrew proposal to host COP 33 in 2028 (originally offered at COP 28 Dubai); South Korea is now sole applicant." },
+        { q: "As per Textiles Ministry's Household Survey, what is the domestic textile market size recorded in 2024?", a: ["A) Rs 4.89 lakh Cr", "B) Rs 8.77 lakh Cr", "C) Rs 14.95 lakh Cr", "D) Rs 20.00 lakh Cr"], c: "C", e: "Increased to Rs 14.95 lakh Cr (CAGR 8.3%). Man-made fibre & blended products hold highest share (52.2%)." },
+        { q: "Which city was ranked as India's most polluted city in March 2026 according to CREA report?", a: ["A) Ghaziabad", "B) Gurugram", "C) Delhi", "D) Noida"], c: "B", e: "Gurugram most polluted in March 2026 (PM2.5 116 ug/m3). Ghaziabad remained most polluted overall for FY26." },
+        { q: "According to NITI Aayog's 2nd credit report, Indian women borrowers hold a total credit portfolio of:", a: ["A) Rs 25 lakh Cr", "B) Rs 45 lakh Cr", "C) Rs 76 lakh Cr", "D) Rs 100 lakh Cr"], c: "C", e: "Hold Rs 76 lakh Cr (26% of total system credit). Women business credit grew at 31% CAGR (2022-25)." },
+        { q: "According to ISRO's ISSAR-2025 report, how many total Indian satellites are currently in Low Earth Orbit (LEO)?", a: ["A) 32", "B) 50", "C) 86", "D) 112"], c: "C", e: "86 Indian satellites in LEO (27 operational, 23 defunct, 36 decayed). Global record 315 rockets launched in 2025." },
+        { q: "According to IRENA Renewable Energy Statistics 2026, renewable sources met what record share of India's power demand in July 2025?", a: ["A) 33.3%", "B) 42.5%", "C) 51.5%", "D) 60.0%"], c: "C", e: "Met record 51.5% of demand in July 2025. India achieved 50% non-fossil capacity 5 years ahead of Paris target." },
+        { q: "The Delimitation Bill cleared alongside Nari Shakti Vandan Adhiniyam proposes to increase Lok Sabha seats from 543 to:", a: ["A) 600", "B) 750", "C) 816", "D) 900"], c: "C", e: "Proposes 50% seat increase (543 to 816 in Lok Sabha, reserving 273 for women from 2029 elections)." },
+        { q: "According to Tracxn, India ranked 4th globally in tech startup funding in FY26 raising how much capital?", a: ["A) $9.7 Billion", "B) $11.7 Billion", "C) $14.3 Billion", "D) $20.0 Billion"], c: "B", e: "Raised $11.7 Billion in FY26 across 129 acquisitions and 47 IPOs, creating 6 new unicorns." },
+        { q: "NITI Aayog released 2 reports on the R&D ecosystem after consulting 400+ leaders and 850+ scientists titled:", a: ["A) R&D Vision 2030", "B) Ease of Doing Research & Development in India", "C) National Innovation Index", "D) ANRF R&D Matrix"], c: "B", e: "Released 'Ease of Doing R&D in India' and its companion Survey Report based on 9 months of outreach." },
+        { q: "World Bank and ADB committed how much total funding for Amaravati Capital Phase-I development?", a: ["A) $800 Million", "B) $1,200 Million", "C) $1,600 Million ($800M each)", "D) $2,000 Million"], c: "C", e: "Committed $1,600M total ($800M each). World Bank released $340M so far with 6-yr grace & 29-yr maturity." },
+        { q: "Under the CAPF General Administration Act 2026, what percentage of Additional Director General (ADG) posts are reserved for IPS deputation?", a: ["A) 33%", "B) 50%", "C) 67%", "D) 100%"], c: "C", e: "Mandates 50% IG posts, at least 67% ADG posts, and 100% SDG/DG posts in CAPF to be filled by IPS officers." },
+        { q: "Dredging Corporation of India (DCIL) signed a strategic alliance MoU for shipbuilding & repairs with:", a: ["A) Mazagon Dock", "B) Colombo Dockyard PLC, Sri Lanka", "C) Cochin Shipyard", "D) Sembcorp Marine"], c: "B", e: "Signed with Colombo Dockyard PLC in Colombo to explore specialized dredger construction." },
+        { q: "FIU-IND signed an information-sharing MoU for cyber fraud prevention with which MHA organization?", a: ["A) NCRB", "B) I4C (Indian Cyber Crime Coordination Centre)", "C) CERT-In", "D) NIA"], c: "B", e: "Partnered with I4C to establish fraud detection feedback loops and red flag guidelines for banks." },
+        { q: "NTPC signed a non-binding MoU with Électricité de France (EDF) to explore nuclear power projects based on:", a: ["A) VVER Tech", "B) EDF's EPR Technology", "C) PHWR Tech", "D) Small Modular Reactors"], c: "B", e: "Jointly assessing applicability of EDF's EPR nuclear technology for Indian conditions." },
+        { q: "Doordarshan (Prasar Bharati) signed a 3-year cultural diplomacy MoU with which council?", a: ["A) ICCR", "B) Sahitya Akademi", "C) Sangeet Natak Akademi", "D) ICHR"], c: "A", e: "Signed with Indian Council for Cultural Relations (ICCR) with joint ownership of content rights in perpetuity." },
+        { q: "Ministry of Labour & Employment signed MoUs with Porter and Gigin Tech to expand job matching via which portal?", a: ["A) e-Shram", "B) National Career Service (NCS) Portal", "C) Skill India Digital", "D) My Bharat"], c: "B", e: "Porter aims 6 lakh logistics jobs/yr and Gigin 2-3 lakh jobs/yr via NCS portal (launched in 2015)." },
+        { q: "Deakin University of Australia partnered with Telangana's innovation hub Aikam to set up which applied AI hub?", a: ["A) Aikam-AI Center", "B) Aikam-DHRITI Hub", "C) Telangana AI Labs", "D) Deakin Tech Park"], c: "B", e: "Setting up joint applied AI research center 'Aikam-DHRITI' across education, research & industry." },
+        { q: "Vietnam's Vingroup signed an MoU with Maharashtra government for strategic investments worth:", a: ["A) $2.5 Billion", "B) $5.0 Billion", "C) $6.5 Billion", "D) $10.0 Billion"], c: "C", e: "$6.5B investment covering 1,000-hectare urban township ($5B) and 60,000 electric taxis ($1.5B)." },
+        { q: "India signed an MoU for a Small Development Project to construct a school in Myanmar's capital:", a: ["A) Yangon", "B) Mandalay", "C) Nay Pyi Taw", "D) Bago"], c: "C", e: "Signed during MoS Kirti Vardhan Singh's visit for school construction in Nay Pyi Taw." },
+        { q: "Gujarat government signed an MoU with Allegiance International (Taiwan) to build an Industrial Park in:", a: ["A) Dholera-Dharampur", "B) Sanand-Dholera region", "C) GIFT City", "D) Vadodara"], c: "B", e: "Developing Indo-Taiwan Industrial Park in Sanand-Dholera expecting Rs 1,000 Cr+ FDI in semiconductors." }
+    ];
+
+    const pool = document.getElementById('questions-pool');
+
+    // Render questions
+    db.forEach((item, index) => {
+        let optHtml = '';
+        item.a.forEach((opt) => {
+            const letter = opt.substring(0, 1);
+            optHtml += `<div class="option" id="label_${index}_${letter}" onclick="toggleOption('${index}', '${letter}')">
+                <input type="radio" name="q${index}" value="${letter}" id="q_${index}_${letter}" data-waschecked="false">
+                <span class="opt-txt">${opt}</span>
+            </div>`;
+        });
+
+        pool.innerHTML += `
+            <div class="q-card" id="card_${index}">
+                <div class="q-text">Q${index + 1}. ${item.q}</div>
+                <div class="options-grid">${optHtml}</div>
+                <div class="exp-box" id="exp_${index}"><strong>Correct Answer: ${item.c}</strong> — ${item.e}</div>
+            </div>
+        `;
+    });
+
+    // Toggle Selection / Deselect Handler Logic
+    function toggleOption(qIndex, letter) {
+        const targetRadio = document.getElementById(`q_${qIndex}_${letter}`);
+        if (!targetRadio) return;
+
+        const isAlreadyChecked = targetRadio.dataset.waschecked === "true";
+
+        // Reset state for all radio inputs of this question
+        document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r => {
+            r.checked = false;
+            r.dataset.waschecked = "false";
+        });
+
+        // Toggle logic: If it was NOT checked previously, set it to checked
+        if (!isAlreadyChecked) {
+            targetRadio.checked = true;
+            targetRadio.dataset.waschecked = "true";
+        }
+    }
+
+    function evaluateMetrics() {
+        let correctCount = 0;
+        let totalQuestions = db.length;
+
+        db.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const exp = document.getElementById(`exp_${index}`);
+            
+            if (exp) exp.style.display = 'block';
+
+            // Clear previous choice highlights
+            item.a.forEach(opt => {
+                const letCode = opt.substring(0, 1);
+                document.getElementById(`label_${index}_${letCode}`).classList.remove('correct-choice', 'wrong-choice');
+            });
+
+            // Highlight Correct Answer inside card
+            document.getElementById(`label_${index}_${item.c}`).classList.add('correct-choice');
+
+            if (selected) {
+                if (selected.value === item.c) {
+                    correctCount++;
+                } else {
+                    document.getElementById(`label_${index}_${selected.value}`).classList.add('wrong-choice');
+                }
+            }
+        });
+
+        let wrongCount = totalQuestions - correctCount;
+        let simulatedPercentile = ((correctCount / totalQuestions) * 100).toFixed(1);
+        if (correctCount === totalQuestions) simulatedPercentile = "100.0";
+        else if (correctCount === 0) simulatedPercentile = "0.0";
+        else simulatedPercentile = (parseFloat(simulatedPercentile) - (Math.random() * 1.5)).toFixed(1);
+
+        // Update Dashboard Stats
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('scoreText').innerText = `Absolute Score: ${correctCount} / ${totalQuestions}`;
+        document.getElementById('percentileText').innerText = `Simulated Competitive Rank: ${simulatedPercentile}%`;
+        document.getElementById('correctCount').innerText = correctCount;
+        document.getElementById('wrongCount').innerText = wrongCount;
+
+        // Render True 3D Donut/Pie Chart via Highcharts
+        Highcharts.chart('chart3DContainer', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                options3d: {
+                    enabled: true,
+                    alpha: 45,
+                    beta: 0
+                }
+            },
+            title: { text: '' },
+            accessibility: { point: { valueSuffix: '%' } },
+            tooltip: { pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>' },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 45,
+                    innerSize: 50,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}: {point.y}',
+                        style: { color: '#ffffff', fontSize: '12px' }
+                    }
+                }
+            },
+            series: [{
+                name: 'Questions',
+                data: [
+                    { name: 'Correct', y: correctCount, color: '#10b981', sliced: true, selected: true },
+                    { name: 'Wrong/Unattempted', y: wrongCount, color: '#ef4444' }
+                ]
+            }],
+            credits: { enabled: false }
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
